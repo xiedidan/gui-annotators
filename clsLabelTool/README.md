@@ -21,6 +21,8 @@ python label.py
 
 Label batches of images.  
 
+![Snapshot](./snapshot-1.png)
+
 startup:  
 
 ```
