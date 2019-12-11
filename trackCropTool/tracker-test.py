@@ -1,9 +1,9 @@
+import time
 import cv2
 
 # const
-tracker = 'csrt'
+tracker_name = 'csrt'
 video_path = './test.mp4'
-show_video = True
 output_path = './track_test.mp4'
 
 fps = 60.
@@ -19,44 +19,45 @@ OPENCV_OBJECT_TRACKERS = {
     "mosse": cv2.TrackerMOSSE_create
 }
 
-tracker = OPENCV_OBJECT_TRACKERS[tracker]()
 initBBox = None
 
-fourcc_str = 'X264'
-fourcc = cv2.cv.CV_FOURCC(**list(fourcc_str))
-output = cv2.VideoWriter(output_path, fourcc, fps, frame_size)
+fourcc_str = 'H264'
+fourcc = cv2.VideoWriter_fourcc(*fourcc_str)
+output = cv2.VideoWriter(output_path, fourcc, fps, frame_size, True)
 
 input = cv2.VideoCapture(video_path)
 
+# read all frames
 while True:
-    frame = input.read()
+    success, frame = input.read()
     
-    if frame == None:
+    if not success:
         break
 
     if initBBox is not None:
         success, bbox = tracker.update(frame)
 
-    if success:
-        x, y, w, h = [int(v) for v in bbox]
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        if success:
+            x, y, w, h = [int(v) for v in bbox]
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
-    if show_video:
-        cv2.imshow('{} - {}'.format(tracker, video_path), frame)
+        if output.isOpened():
+            output.write(frame)
 
-    if output.isOpened():
-        output.write(frame)
+    window_name = '{} - {}'.format(tracker_name, video_path)
+    cv2.imshow(window_name, frame)
 
     key = cv2.waitKey(1) & 0xff
 
     if key == ord('s'):
         initBBox = cv2.selectROI(
-            '{} - {}'.format(tracker, video_path),
+            window_name,
             frame,
             fromCenter=False,
             showCrosshair=True
         )
 
+        tracker = OPENCV_OBJECT_TRACKERS[tracker_name]()
         tracker.init(frame, initBBox)
     elif key == ord('q'):
         break
