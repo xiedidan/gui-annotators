@@ -2,8 +2,8 @@ import time
 import cv2
 
 # const
-tracker_name = 'csrt'
-video_path = './test.mp4'
+tracker_name = 'mosse'
+video_path = '../../../dl_data/warframe/export/2019-12-09_23-44-31_4.mp4'
 output_path = './track_test.mp4'
 
 fps = 60.

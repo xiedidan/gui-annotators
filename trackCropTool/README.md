@@ -17,13 +17,15 @@ Class label could be assigned to target.
 
 ## 4. Target Details  
    * Anchor BBox  
+   * BBox scale  
    * Predefined Label List
    * Online Tracker Tuning:
       * Tracker Selector  
       * Confidence Threshold  
       * NMS Threshold  
    * Frame Locator  
-      * Start  (Auto or Specified)
+      * Anchor  
+      * Start (Auto or Specified)
       * End (Auto or Specified)  
    * Crop Preview  
       * Crop Grid  
@@ -31,7 +33,7 @@ Class label could be assigned to target.
       
 ## 5. Track Preview  
    * Preview  
-      * BBox  
+      * Actual BBox / Scaled BBox  
       * Target ID  
       * Tracker Confidence  
    * Simple Video Control  
@@ -47,6 +49,8 @@ Class label could be assigned to target.
       * Current / Total Frame Display
 
 ## 6. Control Box  
+   * Mode  
+      * Grayscale  
    * Clear  
       * Current - clear all targets in current video  
       * All - clear all targets in all videos  
