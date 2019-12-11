@@ -16,13 +16,14 @@ Class label could be assigned to target.
    * Target CRUD operations.  
 
 ## 4. Target Details  
-   * Initial BBox  
+   * Anchor BBox  
    * Predefined Label List
    * Online Tracker Tuning:
+      * Tracker Selector  
       * Confidence Threshold  
       * NMS Threshold  
    * Frame Locator  
-      * Start  
+      * Start  (Auto or Specified)
       * End (Auto or Specified)  
    * Crop Preview  
       * Crop Grid  
@@ -34,9 +35,11 @@ Class label could be assigned to target.
       * Target ID  
       * Tracker Confidence  
    * Simple Video Control  
+      * Forward  
+      * Backward  
       * Start  
+      * End  
       * Pause  
-      * Stop  
       * Speed Grid  
          * Slow (2x, 3x, 4x, 5x or specified)  
          * Fast (2x, 3x, 4x, 5x or specified)  
