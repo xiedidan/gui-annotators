@@ -71,3 +71,24 @@ So we are creating target sequence in video time space.
    * Save  
       * Current - save current metadata  
       * All - save all metadata  
+
+## Design  
+
+### 1. Loop  
+There are 2 event loops:  
+   1. cv2 window event loop - which requires at least cv2.waitKey(1)  
+   2. GUI event loop  
+
+Let's put cv2 window into a track-and-render (TAR) process and leave GUI in main process.  
+They talk with each other with python queues.  
+Main process sends commands and parameters, while TAR process sends progress and roi selected by user.  
+Refresh intervals are seperate in these processes.  
+
+However, for main process, window reading must be non-blocking, since TAR process will send progress info to drive GUI.  
+
+### 2. MVP  
+Model-View-Presenter pattern is used.  
+The presenter handles GUI event and updates model in actions. It also renders model to GUI in binders.  
+Presenter holds both view and model, so actions and binders could visit any info they needed.  
+Binder functions are implemented as decorators (to decorate actions).  
+In this way, we bind rendering to model updating.  

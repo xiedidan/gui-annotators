@@ -10,6 +10,8 @@ from PIL import Image, ImageDraw, ImageColor
 import pandas as pd
 import PySimpleGUI as sg
 
+from model import *
+
 # global
 class_file = './predefined_classes.txt'
 classes = []
@@ -165,6 +167,8 @@ layout = [
             [sg.Frame('Crops', [
                 [
                     sg.Text('Crop Page: {} / {}'),
+                    sg.VerticalSeparator(pad=None),
+                    sg.Button('Crop'),
                     sg.VerticalSeparator(pad=None),
                     sg.Checkbox('Tag')
                 ],
