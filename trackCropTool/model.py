@@ -13,3 +13,5 @@ class Sequence:
         self.bbox_scale = bbox_scale
         self.tracker_name = tracker_name
         self.anchor = anchor
+        self.insert = insert
+        self.exit = exit
