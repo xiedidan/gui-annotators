@@ -81,7 +81,7 @@ class Presenter:
                 
                 self.window.FindElement('CalcStart').Update(disabled=True)
                 self.window.FindElement('CalcEnd').Update(disabled=True)
-                
+
                 self.window.FindElement('SetStart').Update(disabled=True)
                 self.window.FindElement('SetAnchor').Update(disabled=True)
                 self.window.FindElement('SetEnd').Update(disabled=True)
@@ -139,11 +139,13 @@ class Presenter:
     def __init__(
         self,
         window,
+        player,
         labels,
         tracker_names,
         frame_types
         ):
         self.window = window
+        self.player = player
 
         # paths
         self.video_path = None
@@ -238,7 +240,7 @@ class Presenter:
         self.seq.tracker_name = values['Tracker']
 
     # helpers
-    def dispatch(self, event, values):
+    def gui_dispatch(self, event, values):
         # we don't handle 'Cancel' here
 
         if event == 'VideoPath':
@@ -250,6 +252,9 @@ class Presenter:
         elif event == 'SeqList':
             self.on_seq_list(values)
 
+    def player_dispatch(self):
+        pass
+
     def match_metadata(self):
         if self.metadata_path is not None:
             video = self.videos[self.video_index]
@@ -260,4 +265,3 @@ class Presenter:
             if osp.exists(seq_path):
                 with open(seq_path, 'rb') as seq_file:
                     self.seqs = Unpickler(seq_file).load()
-

@@ -3,6 +3,7 @@ import sys
 import io
 import base64
 import math
+import time
 
 import cv2
 import numpy as np
@@ -11,6 +12,7 @@ import pandas as pd
 import PySimpleGUI as sg
 
 from presenter import Presenter
+from player import PlayerState, Player
 
 # global
 class_file = './predefined_classes.txt'
@@ -129,10 +131,11 @@ layout = [
                 [sg.ProgressBar(pageCount, orientation='h', size=(48, 5), key='ProgressBar')],
                 [sg.Slider(key='FrameSlider', orientation='h', size=(48, 15), disable_number_display=True)],
                 [
-                    
+                    sg.Button(' ← '),
                     sg.Button(' ◄ '),
                     sg.Button('   ‖   '),
                     sg.Button(' ► '),
+                    sg.Button(' → '),
                     sg.VerticalSeparator(pad=None),
                     sg.Button('  {  '),
                     sg.Button('  ⌂  '),
@@ -175,25 +178,35 @@ layout = [
     ]
 ]
 
-# finalize window so presenter could init ASAP
-window = sg.Window('Track Label Tool', layout, finalize=True)
+if __name__ == '__main__':
+    # finalize window so presenter could init ASAP
+    window = sg.Window('Track Label Tool', layout, finalize=True)
+    player = Player()
 
-# MVP Presenter
-presenter = Presenter(
-    window,
-    classes,
-    tracker_names,
-    frame_types
-)
+    # MVP Presenter
+    presenter = Presenter(
+        window,
+        player,
+        classes,
+        tracker_names,
+        frame_types
+    )
 
-# main loop
-while True:
-    # GUI handler
-    event, values = window.read()
+    # main loop
+    while True:
+        # GUI handler
+        event, values = window.read(timeout=0)
 
-    if event in (None, 'Cancel'):
-        break
-    else:
-        presenter.dispatch(event, values)
+        if event in (None, 'Cancel'):
+            break
+        elif event == sg.TIMEOUT_KEY:
+            pass
+        else:
+            presenter.gui_dispatch(event, values)
 
-window.close()
+        if player.read():
+            presenter.player_dispatch()
+
+        time.sleep(0.005)
+
+    window.close()
