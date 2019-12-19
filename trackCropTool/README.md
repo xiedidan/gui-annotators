@@ -79,12 +79,9 @@ There are 2 event loops:
    1. cv2 window event loop - which requires at least cv2.waitKey(1)  
    2. GUI event loop  
 
-Let's put cv2 window into a track-and-render (TAR) process and leave GUI in main process.  
-They talk with each other with python queues.  
-Main process sends commands and parameters, while TAR process sends progress and roi selected by user.  
-Refresh intervals are seperate in these processes.  
-
-However, for main process, window reading must be non-blocking, since TAR process will send progress info to drive GUI.  
+cv2.waitKey() will always block loop for a short period.  
+So window.read() will be async.  
+The GUI refresh rate gets sync to frame rate.  
 
 ### 2. MVP  
 Model-View-Presenter pattern is used.  

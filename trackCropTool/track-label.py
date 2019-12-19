@@ -194,6 +194,8 @@ if __name__ == '__main__':
 
     # main loop
     while True:
+        player.start_frame()
+
         # GUI handler
         event, values = window.read(timeout=0)
 
@@ -204,9 +206,7 @@ if __name__ == '__main__':
         else:
             presenter.gui_dispatch(event, values)
 
-        if player.read():
-            presenter.player_dispatch()
-
-        time.sleep(0.005)
+        if not player.go():
+            time.sleep(0.005)
 
     window.close()
