@@ -81,7 +81,7 @@ There are 2 event loops:
 
 cv2.waitKey() will always block loop for a short period.  
 So window.read() will be async.  
-The GUI refresh rate gets sync to frame rate.  
+GUI refresh rate gets sync to frame rate.  
 
 ### 2. MVP  
 Model-View-Presenter pattern is used.  

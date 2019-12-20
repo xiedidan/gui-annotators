@@ -1,3 +1,4 @@
+import sys
 import timeit
 
 import cv2
@@ -26,6 +27,7 @@ class Player:
         self.anchor_frame = 0
         self.anchor = []
 
+        self.grayscale = False
         self.bbox_scale = 1.
         self.speed_ratio = 1
 
@@ -62,31 +64,57 @@ class Player:
             self.video = cv2.VideoCapture(video_file)
             self.total_frame = self.video.get(cv2.CAP_PROP_FRAME_COUNT)
             self.fps = self.video.get(cv2.CAP_PROP_FPS)
-            self.frame = self.video.get(cv2.CV_CAP_PROP_POS_FRAMES)
+            self.frame = self.video.get(cv2.CAP_PROP_POS_FRAMES)
 
             self.window_name = '{} - {}'.format(video_file, self.tracker_name)
 
-            self.frame = self.video.read()
+            ret, self.frame = self.video.read()
 
             cv2.imshow(self.window_name, self.frame)
             cv2.waitKey(1)
 
             return True
         except:
+            print(sys.exc_info()[0], sys.exc_info()[1])
             return False
 
-    def start_frame(self):
+    def seek(self):
+        if not self.direction and self.frame_pos > 1:
+            # we have to seek for backwards - this may be slow and hammers cpu
+            # we may re-encode the video in reverse frame order into a temporary file
+            self.video.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos-2)
+    
+    def refresh(self):
+        try:
+            ret, self.frame = self.video.read()
+
+            cv2.imshow(self.window_name, self.frame)
+            cv2.waitKey(1)
+
+            self.seek()
+
+            return True
+        except:
+            print(sys.exc_info()[0], sys.exc_info()[1])
+            return False
+
+    def frame_start(self):
         self.frame_start_time = timeit.default_timer()
 
     def go(self):
         if self.playing:
             if self.video is not None:
-                self.frame_pos = self.video.get(cv2.CV_CAP_PROP_POS_FRAMES)
+                self.frame_pos = self.video.get(cv2.CAP_PROP_POS_FRAMES)
                 success, self.frame = self.video.read()
+
+                self.seek()
 
                 if not success:
                     return False
-            
+
+                if self.grayscale:
+                    self.frame = cv2.cvtColor(self.grayscale, cv2.COLOR_BGR2GRAY)
+
                 if len(self.anchor) > 0 and self.frame_pos == self.anchor_frame:
                     self.tracker = OPENCV_OBJECT_TRACKERS[self.tracker_name]()
                     self.tracker.init(self.frame, self.anchor)

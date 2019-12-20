@@ -12,7 +12,7 @@ import pandas as pd
 import PySimpleGUI as sg
 
 from presenter import Presenter
-from player import PlayerState, Player
+from player import Player
 
 # global
 class_file = './predefined_classes.txt'
@@ -38,10 +38,15 @@ tracker_names = [
     "medianflow",
     "mosse"
 ]
-frame_types = [
-    'Auto',
-    'Specified'
-]
+speeds = {
+    'Speed0': 1./8,
+    'Speed1': 1./4,
+    'Speed2': 1./2,
+    'Speed3': 1.,
+    'Speed4': 2.,
+    'Speed5': 4.,
+    'Speed6': 8.
+}
 
 batch_size = GRID_SIZE[0] * GRID_SIZE[1]
 
@@ -102,6 +107,8 @@ layout = [
                 [
                     sg.Button('Add', key='AddSeq'),
                     sg.Button('Del', key='DelSeq'),
+                    sg.Button('Save', key='Save'),
+                    sg.Button('Clear', key='Clear')
                 ]
             ])],
             [sg.Frame('Sequence', [
@@ -109,7 +116,9 @@ layout = [
                     sg.Combo(tracker_names, default_value='kcf', key='Tracker'),
                     sg.VerticalSeparator(pad=None),
                     sg.Text('BBox Scale:'),
-                    sg.In('1.0', key='BboxScale', size=(5, 1))
+                    sg.In('1.0', key='BboxScale', size=(5, 1)),
+                    sg.VerticalSeparator(pad=None),
+                    sg.Checkbox('Grayscale', key='Grayscale'),
                 ],
                 [sg.Listbox(values=classes, key='LabelList', enable_events=True, size=(51, len(classes)))],
                 [
@@ -128,27 +137,27 @@ layout = [
             ])],
             [sg.Frame('Preview', [
                 [sg.T('Progress: 0/0', key='VideoProgress', size=(30, 1), auto_size_text=True)],
-                [sg.ProgressBar(pageCount, orientation='h', size=(48, 5), key='ProgressBar')],
-                [sg.Slider(key='FrameSlider', orientation='h', size=(48, 15), disable_number_display=True)],
+                [sg.ProgressBar(100, orientation='h', size=(48, 5), key='ProgressBar')],
+                [sg.Slider(key='FrameSlider', orientation='h', size=(48, 15), disable_number_display=True, enable_events=True)],
                 [
-                    sg.Button(' ← '),
-                    sg.Button(' ◄ '),
-                    sg.Button('   ‖   '),
-                    sg.Button(' ► '),
-                    sg.Button(' → '),
+                    sg.Button(' ← ', key='Retreat'),
+                    sg.Button(' ◄ ', key='Backward'),
+                    sg.Button('   ‖   ', key='Pause'),
+                    sg.Button(' ► ', key='Forward'),
+                    sg.Button(' → ', key='Advance'),
                     sg.VerticalSeparator(pad=None),
-                    sg.Button('  {  '),
-                    sg.Button('  ⌂  '),
-                    sg.Button('  }  '),
+                    sg.Button('  {  ', key='JumpStart'),
+                    sg.Button('  ⌂  ', key='JumpAnchor'),
+                    sg.Button('  }  ', key='JumpEnd'),
                 ],
                 [
-                    sg.Radio('⅛', 'SpeedRadio'),
-                    sg.Radio('¼', 'SpeedRadio'),
-                    sg.Radio('½', 'SpeedRadio'),
-                    sg.Radio('1', 'SpeedRadio', default=True),
-                    sg.Radio('2', 'SpeedRadio'),
-                    sg.Radio('4', 'SpeedRadio'),
-                    sg.Radio('8', 'SpeedRadio')
+                    sg.Radio('⅛', 'SpeedRadio', key='Speed0'),
+                    sg.Radio('¼', 'SpeedRadio', key='Speed1'),
+                    sg.Radio('½', 'SpeedRadio', key='Speed2'),
+                    sg.Radio('1', 'SpeedRadio', default=True, key='Speed3'),
+                    sg.Radio('2', 'SpeedRadio', key='Speed4'),
+                    sg.Radio('4', 'SpeedRadio', key='Speed5'),
+                    sg.Radio('8', 'SpeedRadio', key='Speed6')
                 ]
             ])],
             [sg.Frame('Crops', [
@@ -157,22 +166,13 @@ layout = [
                     sg.VerticalSeparator(pad=None),
                     sg.Button('Crop'),
                     sg.VerticalSeparator(pad=None),
-                    sg.Checkbox('Tag')
+                    sg.Checkbox('Tag', key='Tag')
                 ],
                 [
                     sg.Button(' ◄ '),
-                    sg.Slider(key='FrameSlider', orientation='h', size=(38, 24), disable_number_display=True),
+                    sg.Slider(key='CropSlider', orientation='h', size=(38, 24), disable_number_display=True),
                     sg.Button(' ► '),
                 ]
-            ])],
-            [sg.Frame('Misc.', [
-                [sg.Checkbox('Grayscale')],
-                [
-                    sg.Button('Save'),
-                    sg.Button('Save All'),
-                    sg.VerticalSeparator(pad=None),
-                    sg.Button('Clear'),
-                    sg.Button('Clear All')]
             ])]
         ])
     ]
@@ -189,12 +189,12 @@ if __name__ == '__main__':
         player,
         classes,
         tracker_names,
-        frame_types
+        speeds,
     )
 
     # main loop
     while True:
-        player.start_frame()
+        player.frame_start()
 
         # GUI handler
         event, values = window.read(timeout=0)
@@ -206,7 +206,11 @@ if __name__ == '__main__':
         else:
             presenter.gui_dispatch(event, values)
 
-        if not player.go():
+        presenter.render_player()
+
+        play_flag = player.go()
+
+        if not play_flag:
             time.sleep(0.005)
 
     window.close()
