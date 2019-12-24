@@ -79,10 +79,14 @@ class Player:
             return False
 
     def seek(self):
+        if self.direction and self.frame_pos < self.total_frame - 1:
+            # it looks CAP_PROP_POS_FRAMES won't increment automatically...
+            self.video.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos+1)
+
         if not self.direction and self.frame_pos > 1:
             # we have to seek for backwards - this may be slow and hammers cpu
             # we may re-encode the video in reverse frame order into a temporary file
-            self.video.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos-2)
+            self.video.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos-1)
     
     def refresh(self):
         try:
@@ -104,9 +108,11 @@ class Player:
     def go(self):
         if self.playing:
             if self.video is not None:
+                # get current frame no
                 self.frame_pos = self.video.get(cv2.CAP_PROP_POS_FRAMES)
                 success, self.frame = self.video.read()
 
+                # seek for next frame no
                 self.seek()
 
                 if not success:
