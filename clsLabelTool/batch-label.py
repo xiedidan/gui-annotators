@@ -189,6 +189,7 @@ layout = [
         sg.Column([
             [sg.Frame('Paths:', [
                 [sg.In('Image Directory', key='ImagePath', enable_events=True), sg.FolderBrowse()],
+                [sg.In('Image List File', key='ImageListPath', enable_events=True), sg.FileBrowse(file_types=(('ALL Files', '*.*'), ('CSV', '*.csv')),)],
                 [sg.In('Anno File', key='AnnoPath', enable_events=True), sg.FileBrowse(file_types=(('ALL Files', '*.*'), ('CSV', '*.csv')),)]
             ])],
             [sg.Frame('Image Files:', [
@@ -220,6 +221,32 @@ while True:
             # list image files
             image_path = values['ImagePath']
             image_files = os.listdir(image_path)
+            window.FindElement('ImageList').Update(image_files)
+
+            # calc page info
+            pageNo = 0
+            pageCount = math.ceil(len(image_files) / batch_size)
+
+            pageOffset = 0
+
+            page_nav()
+        except:
+            sg.Popup(sys.exc_info())
+    elif event == 'ImageListPath':
+        try:
+            image_path = values['ImagePath']
+            all_files = os.listdir(image_path)
+
+            img_list_file = values['ImageListPath']
+            img_df = pd.read_csv(img_list_file)
+            filter_files = list(img_df['filename'])
+
+            image_files = []
+            
+            for img_file in filter_files:
+                if img_file in all_files:
+                    image_files.append(img_file)
+
             window.FindElement('ImageList').Update(image_files)
 
             # calc page info
